@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>管理</title>
+    <!-- Bootstrap -->
+    <link th:href="@{/css/bootstrap.css}" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link th:href="@{/css/font-awesome.css}" rel="stylesheet">
+    <!-- NProgress -->
+    <link th:href="@{/css/nprogress.css}" rel="stylesheet">
+    <!-- Bootstrap-Table -->
+    <link rel="stylesheet" th:href="@{/css/bootstrap-table.css}">
+
+    <!-- Custom Theme Style -->
+    <link th:href="@{/css/custom.css}" rel="stylesheet">
+</head>
+<!--<body>
+<div>
+    <button @click="logout">注销</button>
+</div>
+</body>-->
+<body class="nav-md menu_fixed">
+<div class="container body">
+    <div class="main_container">
+        <div th:replace="@{/admin/general}::sideBar"></div>
+
+        <div th:replace="@{/admin/general}::topNavigation"></div>
+
+        <!-- page content -->
+        <div class="right_col" role="main">
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                <table id="table"></table>
+                <div id="toolbar">
+                    <button class="btn btn-danger" id="deleteSelectedBtn">删除选择订单</button>
+                </div>
+            </div>
+        </div>
+        <!-- /page content -->
+
+        <div th:replace="@{/admin/general}::footer"></div>
+    </div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal">
+                    <div class="input-group">
+                        <div class="input-group-addon">包裹状态</div>
+                        <select id="state" class="form-control">
+                            <option>已接单</option>
+                            <option>已递送至物流中心</option>
+                            <option>已签收</option>
+                            <option>收件失败</option>
+                            <option>派件失败</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon">寄件地址</div>
+
+                        <input type="text" class="form-control" id="senderAddress" placeholder="寄件地址">
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon">收件地址</div>
+                        <input type="text" class="form-control" id="receiverAddress" placeholder="收件地址">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" id="saveBtn">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- jQuery -->
+<script th:src="@{/js/jquery.js}"></script>
+<!-- Bootstrap -->
+<script th:src="@{/js/bootstrap.js}"></script>
+<!-- Bootstrap-Table -->
+<script th:src="@{/js/bootstrap-table.js}"></script>
+<script th:src="@{/js/bootstrap-table-zh-CN.js}"></script>
+<!-- NProgress -->
+<script th:src="@{/js/nprogress.js}"></script>
+
+<!-- Custom Theme Scripts -->
+<script th:src="@{/js/custom.js}"></script>
+
+<script>
+    $("#table").bootstrapTable({ // 对应table标签的id
+        contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+        method: "POST",
+        url: "/admin/queryOrderPaged", // 获取表格数据的url
+        cache: false, // 设置为 false 禁用 AJAX 数据缓存， 默认为true
+        striped: true,  //表格显示条纹，默认为false
+        pagination: true, // 在表格底部显示分页组件，默认false
+        pageList: [5, 10, 20], // 设置页面可以显示的数据条数
+        sortable: true,                     //是否启用排序
+        pageSize: 10, // 页面数据条数
+        pageNumber: 1, // 首页页码
+        sidePagination: 'server', // 设置为服务器端分页
+        search: true,                      //是否显示表格搜索
+        strictSearch: true,
+        showColumns: false,                  //是否显示所有的列（选择显示的列）
+        showRefresh: true,                  //是否显示刷新按钮
+        minimumCountColumns: 1,             //最少允许的列数
+        clickToSelect: true,                //是否启用点击选中行
+        uniqueId: "id",                     //每一行的唯一标识，一般为主键列
+        showToggle: false,                   //是否显示详细视图和列表视图的切换按钮
+        cardView: false,                    //是否显示详细视图
+        detailView: false,                  //是否显示父子表
+        toolbar: '#toolbar',    //工具按钮用哪个容器
+        queryParams: function (params) { // 请求服务器数据时发送的参数，可以在这里添加额外的查询参数，返回false则终止请求
+            return {
+                size: params.limit, // 每页要显示的数据条数
+                offset: params.offset, // 每页显示数据的开始行号
+                pageNum: params.offset / params.limit,
+                //sort: params.sort, // 要排序的字段
+                //sortOrder: params.order, // 排位命令（desc，asc）
+                //dataId: $("#dataId").val() // 额外添加的参数
+            }
+        },
+        //sortName: 'id', // 要排序的字段
+        //sortOrder: 'desc', // 排序规则
+        columns: [
+            {
+                checkbox: true, // 显示一个勾选框
+                align: 'center', // 居中显示
+            }, {
+                field: 'id', // 返回json数据中的name
+                title: '编号', // 表格表头显示文字
+                align: 'center', // 左右居中
+                valign: 'middle' // 上下居中
+            }, {
+                field: 'state',
+                title: '状态',
+                align: 'center',
+                valign: 'middle'
+            }, {
+                field: 'date',
+                title: '订单日期',
+                align: 'center',
+                valign: 'middle'
+            }, {
+                field: 'receiveDelivererId',
+                title: '收件邮差id',
+                align: 'center',
+                valign: 'middle'
+            }, {
+                field: 'dispatchDelivererId',
+                title: '派件邮差id',
+                align: 'center',
+                valign: 'middle'
+            }, {
+                field: 'senderName',
+                title: '寄件人',
+                align: 'center',
+                valign: 'middle'
+            }, {
+                field: 'senderPhone',
+                title: '寄件人电话',
+                align: 'center',
+                valign: 'middle'
+            }, {
+                field: 'senderAddress',
+                title: '寄件人地址',
+                align: 'center',
+                valign: 'middle'
+            }, {
+                field: 'receiverName',
+                title: '收件人',
+                align: 'center',
+                valign: 'middle'
+            }, {
+                field: 'receiverPhone',
+                title: '收件人电话',
+                align: 'center',
+                valign: 'middle'
+            }, {
+                field: 'receiverAddress',
+                title: '收件人地址',
+                align: 'center',
+                valign: 'middle'
+            }, {
+                field: 'type',
+                title: '物品类型',
+                align: 'center',
+                valign: 'middle'
+            }, {
+                field: 'weight',
+                title: '物品重量',
+                align: 'center',
+                valign: 'middle'
+            }, {
+                field: 'enterDate',
+                title: '入库日期',
+                align: 'center',
+                valign: 'middle'
+            }, {
+                field: 'outDate',
+                title: '签收日期',
+                align: 'center',
+                valign: 'middle'
+            }, {
+                field: 'receiveArea',
+                title: '收件地区',
+                align: 'center',
+                valign: 'middle'
+            }, {
+                field: 'dispatchArea',
+                title: '派件地区',
+                align: 'center',
+                valign: 'middle'
+            }, {
+                field: 'ps',
+                title: '备注',
+                align: 'center',
+                valign: 'middle'
+            }, {
+                field: 'dispatchErrorNum',
+                title: '派件失败次数',
+                align: 'center',
+                valign: 'middle'
+            }/*, {
+                field: 'calcMode',
+                title: '计算方式',
+                align: 'center',
+                valign: 'middle',
+                formatter: function (value, row, index){ // 单元格格式化函数
+                    var text = '-';
+                    if (value == 1) {
+                        text = "方式一";
+                    } else if (value == 2) {
+                        text = "方式二";
+                    } else if (value == 3) {
+                        text = "方式三";
+                    } else if (value == 4) {
+                        text = "方式四";
+                    }
+                    return text;
+                }
+            }*/, {
+                title: "操作",
+                align: 'center',
+                valign: 'middle',
+                //width: 160, // 定义列的宽度，单位为像素px
+                formatter: function (value, row, index) {
+                    return '<button class="btn btn-danger btn-sm" ' +
+                        'onclick="deleteOrder(\'' + row.id + '\')">删除订单</button>' +
+                        '<button class="btn btn-primary btn-sm" ' +
+                        'onclick="editOrder(' + row.id + ')">编辑订单</button>';
+                }
+            }
+        ],
+        onLoadSuccess: function () {  //加载成功时执行
+            console.info("加载成功");
+        },
+        onLoadError: function () {  //加载失败时执行
+            console.info("加载数据失败");
+        },
+        onDblClickRow: function (row, $element) {
+        }
+    });
+
+    function deleteOrder(orderId) {
+        $.post("/admin/deleteOrder", {
+            orderId: orderId
+        }, function (response) {
+            $("#table").bootstrapTable("refresh");
+        });
+    }
+
+    function editOrder(orderId) {
+        $('#myModal').modal('show');
+        let order = $("#table").bootstrapTable('getRowByUniqueId', orderId);
+        $("#state").val(order.state);
+        $("#senderAddress").val(order.senderAddress);
+        $("#receiverAddress").val(order.receiverAddress);
+        $("#saveBtn").click(function () {
+            order.state = $("#state").val();
+            order.senderAddress = $("#senderAddress").val();
+            order.receiverAddress = $("#receiverAddress").val();
+            $.ajax({
+                type: "post",
+                url: "/admin/editOrder",
+                data: JSON.stringify(order),
+                contentType: "application/json; charset=utf-8",//(可以)
+                //contentType: "text/xml",//(可以)
+                //contentType:"application/x-www-form-urlencoded",//(可以)
+                //dataType: "string",
+                success: function (response) {
+                    $('#myModal').modal('hide');
+                    $("#table").bootstrapTable("refresh");
+                }
+            });
+        });
+    }
+
+    $("#deleteSelectedBtn").click(function () {
+        let selections = $("#table").bootstrapTable('getSelections');
+        $.post("/admin/deleteOrders", {
+            selections: JSON.stringify(selections)
+        }, function () {
+            $("#table").bootstrapTable("refresh");
+        });
+    })
+
+
+</script>
+</body>
+</html>

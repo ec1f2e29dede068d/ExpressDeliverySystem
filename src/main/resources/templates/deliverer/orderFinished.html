@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>快递员</title>
+    <script type="text/javascript" th:src="@{/js/jquery.js}"></script>
+    <script type="text/javascript" th:src="@{/js/vue.js}"></script>
+    <script type="text/javascript" th:src="@{/js/bootstrap.js}"></script>
+    <script type="text/javascript" th:src="@{/js/bootstrap-table.js}"></script>
+    <script type="text/javascript" th:src="@{/js/bootstrap-table-zh-CN.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.css}">
+    <link rel="stylesheet" th:href="@{/css/bootstrap-table.css}">
+    <link rel="stylesheet" th:href="@{/css/customer.css}">
+</head>
+<body>
+<div th:replace="@{/deliverer/nav}::nav"></div>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-6 col-sm-12 col-xs-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">完成的收件单</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="">
+                        <table id="table"></table>
+                        <div id="toolbar"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-sm-12 col-xs-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">完成的派件单</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="">
+                        <table id="table2"></table>
+                        <div id="toolbar2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    $("#table").bootstrapTable({ // 对应table标签的id
+        contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+        method: "POST",
+        url: "/deliverer/queryOrderHandledFinish", // 获取表格数据的url
+        cache: false, // 设置为 false 禁用 AJAX 数据缓存， 默认为true
+        striped: true,  //表格显示条纹，默认为false
+        pagination: true, // 在表格底部显示分页组件，默认false
+        pageList: [5, 10, 20], // 设置页面可以显示的数据条数
+        sortable: true,                     //是否启用排序
+        pageSize: 10, // 页面数据条数
+        pageNumber: 1, // 首页页码
+        sidePagination: 'client', // 设置为服务器端分页
+        search: true,                      //是否显示表格搜索
+        strictSearch: true,
+        showColumns: false,                  //是否显示所有的列（选择显示的列）
+        showRefresh: true,                  //是否显示刷新按钮
+        minimumCountColumns: 1,             //最少允许的列数
+        clickToSelect: true,                //是否启用点击选中行
+        //uniqueId: "id",                     //每一行的唯一标识，一般为主键列
+        showToggle: false,                   //是否显示详细视图和列表视图的切换按钮
+        cardView: true,                    //是否显示详细视图
+        detailView: false,                  //是否显示父子表
+        toolbar: '#toolbar',    //工具按钮用哪个容器
+        queryParams: function (params) { // 请求服务器数据时发送的参数，可以在这里添加额外的查询参数，返回false则终止请求
+            return {
+                size: params.limit, // 每页要显示的数据条数
+                offset: params.offset, // 每页显示数据的开始行号
+                pageNum: params.offset / params.limit,
+                //sort: params.sort, // 要排序的字段
+                //sortOrder: params.order, // 排位命令（desc，asc）
+                //dataId: $("#dataId").val() // 额外添加的参数
+            }
+        },
+        //sortName: 'id', // 要排序的字段
+        //sortOrder: 'desc', // 排序规则
+        columns: [
+            {
+                field: 'id', // 返回json数据中的name
+                title: '编号', // 表格表头显示文字
+                align: 'center', // 左右居中
+                valign: 'middle' // 上下居中
+            }, {
+                field: 'senderName',
+                title: '发送人',
+                align: 'center',
+                valign: 'middle'
+            }, {
+                field: 'senderPhone',
+                title: '发送人电话',
+                align: 'center',
+                valign: 'middle'
+            }, {
+                field: 'senderAddress',
+                title: '发送人地址',
+                align: 'center',
+                valign: 'middle'
+            }, {
+                field: 'type',
+                title: '物品类型',
+                align: 'center',
+                valign: 'middle'
+            }, {
+                field: 'weight',
+                title: '物品重量',
+                align: 'center',
+                valign: 'middle'
+            }
+        ],
+        onLoadSuccess: function () {  //加载成功时执行
+            console.info("加载成功");
+        },
+        onLoadError: function () {  //加载失败时执行
+            console.info("加载数据失败");
+        },
+        onDblClickRow: function (row, $element) {
+        }
+    });
+
+    $("#table2").bootstrapTable({ // 对应table标签的id
+        contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+        method: "POST",
+        url: "/deliverer/queryOrderDispatchFinish", // 获取表格数据的url
+        cache: false, // 设置为 false 禁用 AJAX 数据缓存， 默认为true
+        striped: true,  //表格显示条纹，默认为false
+        pagination: true, // 在表格底部显示分页组件，默认false
+        pageList: [5, 10, 20], // 设置页面可以显示的数据条数
+        sortable: true,                     //是否启用排序
+        pageSize: 10, // 页面数据条数
+        pageNumber: 1, // 首页页码
+        sidePagination: 'client', // 设置为服务器端分页
+        search: true,                      //是否显示表格搜索
+        strictSearch: true,
+        showColumns: false,                  //是否显示所有的列（选择显示的列）
+        showRefresh: true,                  //是否显示刷新按钮
+        minimumCountColumns: 1,             //最少允许的列数
+        clickToSelect: true,                //是否启用点击选中行
+        //uniqueId: "id",                     //每一行的唯一标识，一般为主键列
+        showToggle: false,                   //是否显示详细视图和列表视图的切换按钮
+        cardView: true,                    //是否显示详细视图
+        detailView: false,                  //是否显示父子表
+        toolbar: '#toolbar',    //工具按钮用哪个容器
+        queryParams: function (params) { // 请求服务器数据时发送的参数，可以在这里添加额外的查询参数，返回false则终止请求
+            return {
+                size: params.limit, // 每页要显示的数据条数
+                offset: params.offset, // 每页显示数据的开始行号
+                pageNum: params.offset / params.limit,
+                //sort: params.sort, // 要排序的字段
+                //sortOrder: params.order, // 排位命令（desc，asc）
+                //dataId: $("#dataId").val() // 额外添加的参数
+            }
+        },
+        //sortName: 'id', // 要排序的字段
+        //sortOrder: 'desc', // 排序规则
+        columns: [
+             {
+                field: 'id', // 返回json数据中的name
+                title: '编号', // 表格表头显示文字
+                align: 'center', // 左右居中
+                valign: 'middle' // 上下居中
+            }, {
+                field: 'receiverName',
+                title: '收件人',
+                align: 'center',
+                valign: 'middle'
+            }, {
+                field: 'receiverPhone',
+                title: '收件人电话',
+                align: 'center',
+                valign: 'middle'
+            }, {
+                field: 'receiverAddress',
+                title: '收件人地址',
+                align: 'center',
+                valign: 'middle'
+            }, {
+                field: 'type',
+                title: '物品类型',
+                align: 'center',
+                valign: 'middle'
+            }, {
+                field: 'weight',
+                title: '物品重量',
+                align: 'center',
+                valign: 'middle'
+            }
+        ],
+        onLoadSuccess: function () {  //加载成功时执行
+            console.info("加载成功");
+        },
+        onLoadError: function () {  //加载失败时执行
+            console.info("加载数据失败");
+        },
+        onDblClickRow: function (row, $element) {
+        }
+    });
+
+
+</script>
+</html>

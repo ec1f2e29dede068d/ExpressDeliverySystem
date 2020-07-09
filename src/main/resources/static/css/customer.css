@@ -1,0 +1,68 @@
+.middle {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    -moz-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    -o-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+}
+
+.c-button {
+    background-color: #64B5F6;
+    border: none;
+    padding: 10px;
+    margin: 10px;
+    width: 100px;
+    height: 60px;
+    color: #212121;
+    cursor: pointer;
+    -webkit-transition: 0.8s ease-in-out;
+    -moz-transition: 0.8s ease-in-out;
+    -ms-transition: 0.8s ease-in-out;
+    -o-transition: 0.8s ease-in-out;
+    transition: 0.8s ease-in-out;
+    border-radius: 5px;
+}
+
+.c-button .activiy {
+    text-decoration: none;
+    color: #212121;
+    width: 60px;
+    height: 60px;
+    -webkit-border-radius: 30px;
+    -moz-border-radius: 30px;
+    border-radius: 30px;
+    outline: none;
+}
+
+.c-center {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.c-form-control {
+    display: block;
+    width: 100%;
+    font-size: 1.8rem;
+}
+
+.c-box {
+    width: 330px;
+    margin: 0;
+    padding: 2rem 3.5rem;
+    border: 1px solid #1E88E5;
+    border-radius: 1rem;
+    background-color: #FFF;
+}
+
+@media screen and (max-width: 768px) {
+    .nav > li > button, .nav > li > p {
+        position: relative;
+        display: block;
+        margin: 10px 15px;
+    }
+}

@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>管理</title>
+    <!-- Bootstrap -->
+    <link th:href="@{/css/bootstrap.css}" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link th:href="@{/css/font-awesome.css}" rel="stylesheet">
+    <!-- NProgress -->
+    <link th:href="@{/css/nprogress.css}" rel="stylesheet">
+    <!-- Bootstrap Table-->
+    <link rel="stylesheet" th:href="@{/css/bootstrap-table.css}">
+
+    <!-- Custom Theme Style -->
+    <link th:href="@{/css/custom.css}" rel="stylesheet">
+</head>
+<!--<body>
+<div>
+    <button @click="logout">注销</button>
+</div>
+</body>-->
+<body class="nav-md footer_fixed">
+<div class="container body">
+    <div class="main_container">
+        <div th:replace="@{/admin/general}::sideBar"></div>
+
+        <div th:replace="@{/admin/general}::topNavigation"></div>
+
+        <!-- page content -->
+        <div class="right_col" role="main">
+            <div class="row">
+                <div class="col-md-12 col-sm-12 col-xs-12">
+                    <table id="table"></table>
+                    <div id="toolbar">
+                        <button class="btn btn-danger" id="workLoadButton" data-toggle="modal"
+                                data-target=".bs-example-modal-lg" data-whatever="@work">查询工作量
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /page content -->
+
+        <div th:replace="@{/admin/general}::footer"></div>
+
+        <!-- modals -->
+        <!-- Large modal -->
+        <div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span>
+                        </button>
+                        <div class="form-group">
+                            <label class="control-label col-md-1 col-sm-1 col-xs-12">选择<br>月份</label>
+                            <div class="col-md-3 col-sm-3 col-xs-12">
+                                <select class="form-control" id="monthSelect">
+                                    <option>1</option>
+                                    <option>2</option>
+                                    <option>3</option>
+                                    <option>4</option>
+                                    <option>5</option>
+                                    <option>6</option>
+                                    <option>7</option>
+                                    <option>8</option>
+                                    <option>9</option>
+                                    <option>10</option>
+                                    <option>11</option>
+                                    <option>12</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-sm-6 col-xs-12">
+                                <div id="container" style="width:100%; height: 500px;"></div>
+                            </div>
+                            <div class="col-sm-6 col-xs-12">
+                                <div id="container2" style="width:100%; height: 500px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- jQuery -->
+<script th:src="@{/js/jquery.js}"></script>
+<!-- Bootstrap -->
+<script th:src="@{/js/bootstrap.js}"></script>
+<!-- NProgress -->
+<script th:src="@{/js/nprogress.js}"></script>
+<!-- Bootstrap Table-->
+<script type="text/javascript" th:src="@{/js/bootstrap-table.js}"></script>
+<script type="text/javascript" th:src="@{/js/bootstrap-table-zh-CN.js}"></script>
+<!-- ECharts -->
+<script type="text/javascript" th:src="@{/js/echarts.js}"></script>
+
+<!-- Custom Theme Scripts -->
+<script th:src="@{/js/custom.js}"></script>
+<script>
+    $("#table").bootstrapTable({ // 对应table标签的id
+        contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+        method: "POST",
+        url: "/admin/queryDelivererPaged", // 获取表格数据的url
+        cache: false, // 设置为 false 禁用 AJAX 数据缓存， 默认为true
+        striped: true,  //表格显示条纹，默认为false
+        pagination: true, // 在表格底部显示分页组件，默认false
+        pageList: [5, 10, 20], // 设置页面可以显示的数据条数
+        sortable: true,                     //是否启用排序
+        pageSize: 10, // 页面数据条数
+        pageNumber: 1, // 首页页码
+        sidePagination: 'server', // 设置为服务器端分页
+        search: true,                      //是否显示表格搜索
+        strictSearch: true,
+        showColumns: false,                  //是否显示所有的列（选择显示的列）
+        showRefresh: true,                  //是否显示刷新按钮
+        minimumCountColumns: 1,             //最少允许的列数
+        clickToSelect: true,                //是否启用点击选中行
+        uniqueId: "id",                     //每一行的唯一标识，一般为主键列
+        showToggle: false,                   //是否显示详细视图和列表视图的切换按钮
+        cardView: false,                    //是否显示详细视图
+        detailView: false,                  //是否显示父子表
+        toolbar: '#toolbar',    //工具按钮用哪个容器
+        queryParams: function (params) { // 请求服务器数据时发送的参数，可以在这里添加额外的查询参数，返回false则终止请求
+            return {
+                size: params.limit, // 每页要显示的数据条数
+                offset: params.offset, // 每页显示数据的开始行号
+                pageNum: params.offset / params.limit,
+                //sort: params.sort, // 要排序的字段
+                //sortOrder: params.order, // 排位命令（desc，asc）
+                //dataId: $("#dataId").val() // 额外添加的参数
+            }
+        },
+        //sortName: 'id', // 要排序的字段
+        //sortOrder: 'desc', // 排序规则
+        columns: [
+            /*{
+                checkbox: true, // 显示一个勾选框
+                align: 'center', // 居中显示
+            }, {
+                field: 'id', // 返回json数据中的name
+                title: '编号', // 表格表头显示文字
+                align: 'center', // 左右居中
+                valign: 'middle' // 上下居中
+            }, {
+                field: 'state',
+                title: '状态',
+                align: 'center',
+                valign: 'middle'
+            },*/ {
+                field: 'id',
+                title: '编号',
+                align: 'center',
+                valign: 'middle'
+            }, {
+                field: 'name',
+                title: '昵称',
+                align: 'center',
+                valign: 'middle'
+            }, {
+                field: 'phone',
+                title: '电话',
+                align: 'center',
+                valign: 'middle'
+            }, {
+                field: 'receiveNum',
+                title: '收件量',
+                align: 'center',
+                valign: 'middle'
+            }, {
+                field: 'dispatchNum',
+                title: '派件量',
+                align: 'center',
+                valign: 'middle'
+            }, {
+                field: 'area',
+                title: '地区',
+                align: 'center',
+                valign: 'middle'
+            }, {
+                field: 'state',
+                title: '状态',
+                align: 'center',
+                valign: 'middle'
+            }/*, {
+                field: 'calcMode',
+                title: '计算方式',
+                align: 'center',
+                valign: 'middle',
+                formatter: function (value, row, index){ // 单元格格式化函数
+                    var text = '-';
+                    if (value == 1) {
+                        text = "方式一";
+                    } else if (value == 2) {
+                        text = "方式二";
+                    } else if (value == 3) {
+                        text = "方式三";
+                    } else if (value == 4) {
+                        text = "方式四";
+                    }
+                    return text;
+                }
+            }*/, {
+                title: "操作",
+                align: 'center',
+                valign: 'middle',
+                //width: 160, // 定义列的宽度，单位为像素px
+                formatter: function (value, row, index) {
+                    return '<button class="btn btn-primary btn-sm" ' +
+                        'data-toggle="modal" data-target=".bs-example-modal-lg" ' +
+                        'onclick="queryDutyDetails(' + row.id + ')">查询工作情况</button>';
+                }
+            }
+        ],
+        onLoadSuccess: function () {  //加载成功时执行
+            console.info("加载成功");
+        },
+        onLoadError: function () {  //加载失败时执行
+            console.info("加载数据失败");
+        },
+        onDblClickRow: function (row, $element) {
+        }
+    });
+
+    let option;
+    let option2;
+    let currentDelivererId;
+    let json;
+
+    function queryDutyDetails(delivererId, month) {
+        currentDelivererId = delivererId;
+        if (month === null || month === undefined || month === "") {
+            month = 1;
+            $("#monthSelect").val(1);
+        }
+        let data = [];
+        $.ajaxSetup({async: false});
+        $.post("/admin/queryDelivererDutyDetails",
+            {
+                delivererId: delivererId,
+                month: month
+            }
+            , function (response) {
+                json = JSON.parse(response);
+                if (!(json)) {
+                    data.push({value: '-', name: '在岗天数'});
+                    data.push({value: '-', name: '加班天数'});
+                    data.push({value: '-', name: '请假天数'});
+                } else {
+                    data.push({value: json.work, name: '在岗天数'});
+                    data.push({value: json.overTime, name: '加班天数'});
+                    data.push({value: json.rest, name: '请假天数'});
+                }
+            });
+        option = {
+            title: {
+                text: '邮差' + month + '月工作情况',
+                x: 'center'
+            },
+            tooltip: {
+                trigger: 'item',
+                formatter: "{a} <br/>{b} : {c} ({d}%)"
+            },
+            legend: {
+                orient: 'vertical',
+                left: 'left',
+                data: ['在岗天数', '加班天数', '请假天数']
+            },
+            series: [
+                {
+                    name: '工作情况',
+                    type: 'pie',
+                    radius: '80%',
+                    center: ['50%', '50%'],
+                    data: data,
+                    itemStyle: {
+                        emphasis: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    }
+                }
+            ]
+        };
+    }
+
+    let dom = document.getElementById("container");
+    let dom2 = document.getElementById("container2");
+    let myChart = null;
+    let myChart2 = null;
+
+    function refreshECharts() {
+        if (myChart === null) {
+            myChart = echarts.init(dom);
+            window.addEventListener("resize", () => {
+                myChart.resize();
+            });
+        } else {
+            myChart.resize();
+        }
+        if (option && typeof option === "object") {
+            myChart.setOption(option, true);
+        }
+    }
+
+    function refreshECharts2() {
+        if (myChart2 === null) {
+            myChart2 = echarts.init(dom2);
+            window.addEventListener("resize", () => {
+                myChart2.resize();
+            });
+        } else {
+            myChart2.resize();
+        }
+        if (option2 && typeof option2 === "object") {
+            myChart2.setOption(option2, true);
+        }
+    }
+
+    $(".bs-example-modal-lg").on('shown.bs.modal', function (event) {
+        let button = $(event.relatedTarget);
+        if ("@work" === button.data('whatever')) {
+            $("#container").parent().removeClass("col-sm-12");
+            $("#container").parent().addClass("col-sm-6");
+            $("#container2").removeAttr("hidden");
+            refreshECharts2();
+        } else {
+            $("#container").parent().removeClass("col-sm-6");
+            $("#container").parent().addClass("col-sm-12");
+            $("#container2").attr("hidden", "");
+        }
+        refreshECharts();
+    });
+
+    $("#monthSelect").on("change", function () {
+        if (option.series[0].type === "pie") {
+            queryDutyDetails(currentDelivererId, this.value);
+            refreshECharts();
+        }
+        else if (option.series[0].type === "bar") {
+            queryReceiveWorkLoad(this.value);
+            queryDispatchWorkLoad(this.value);
+            refreshECharts();
+            refreshECharts2();
+        }
+    });
+
+    $("#workLoadButton").click(function () {
+        queryReceiveWorkLoad(1);
+        queryDispatchWorkLoad(1);
+        $("#monthSelect").val(1);
+    });
+
+    function queryReceiveWorkLoad(month) {
+        if (month === null || month === undefined || month === "") {
+            month = 1;
+            $("#monthSelect").val(1);
+        }
+        let series = [];
+        let xAxisData = ['总收件工作量', "最大收件工作量", "最小收件工作量"];
+        let areas = [];
+        $.ajaxSetup({async: false});
+        $.post("/admin/queryDelivererWorkLoad",
+            {
+                month: month
+            }
+            , function (response) {
+                json = JSON.parse(response);
+                if (!(json[0]) || json[0].length === 0) {
+                    let data = [];
+                    data.push("-");
+                    data.push("-");
+                    data.push("-");
+                    areas.push("-");
+                    let obj = {
+                        name: "-",
+                        type: 'bar',
+                        data: data,
+                        animationDelay: function (idx) {
+                            return idx * 10 + 100;
+                        }
+                    };
+                    series.push(obj);
+                } else {
+                    let length = json[0].length;
+                    for (let i = 0; i < length; i++) {
+                        let data = [];
+                        let receiveArea = json[0][i].receiveArea;
+                        data.push(json[0][i].sum);
+                        data.push(json[0][i].max);
+                        data.push(json[0][i].min);
+                        areas.push(receiveArea);
+                        let obj = {
+                            name: receiveArea,
+                            type: 'bar',
+                            data: data,
+                            animationDelay: function (idx) {
+                                return idx * 10 + 100;
+                            }
+                        };
+                        series.push(obj);
+                    }
+                }
+            });
+        option = {
+            title: {
+                text: '月收件工作量'
+            },
+            legend: {
+                data: areas,
+                align: 'left'
+            },
+            grid: {
+                show: true
+            },
+            toolbox: {
+                feature: {
+                    magicType: {
+                        type: ['stack', 'tiled']
+                    },
+                    dataView: {},
+                    saveAsImage: {
+                        pixelRatio: 2
+                    }
+                }
+            },
+            tooltip: {},
+            xAxis: {
+                data: xAxisData,
+                silent: false,
+                splitLine: {
+                    show: true
+                }
+            },
+            yAxis: {
+                minInterval: true
+            },
+            series: series,
+            animationEasing: 'elasticOut',
+            animationDelayUpdate: function (idx) {
+                return idx * 10;
+            }
+        };
+    }
+
+    function queryDispatchWorkLoad(month) {
+        let series2 = [];
+        let xAxisData2 = ['总派件工作量', "最大派件工作量", "最小派件工作量"];
+        let areas2 = [];
+        $.ajaxSetup({async: false});
+        $.post("/admin/queryDelivererWorkLoad",
+            {
+                month: month
+            }
+            , function (response) {
+                json = JSON.parse(response);
+                if (!(json[1]) || json[1].length === 0) {
+                    let data2 = [];
+                    data2.push("-");
+                    data2.push("-");
+                    data2.push("-");
+                    areas2.push("-");
+                    let obj2 = {
+                        name: "-",
+                        type: 'bar',
+                        data: data2,
+                        animationDelay: function (idx) {
+                            return idx * 10 + 100;
+                        }
+                    };
+                    series2.push(obj2);
+                } else {
+                    let length2 = json[1].length;
+                    for (let i = 0; i < length2; i++) {
+                        let data2 = [];
+                        let dispatchArea = json[1][i].dispatchArea;
+                        data2.push(json[1][i].sum);
+                        data2.push(json[1][i].max);
+                        data2.push(json[1][i].min);
+                        areas2.push(dispatchArea);
+                        let obj2 = {
+                            name: dispatchArea,
+                            type: 'bar',
+                            data: data2,
+                            animationDelay: function (idx) {
+                                return idx * 10 + 100;
+                            }
+                        };
+                        series2.push(obj2);
+                    }
+                }
+            });
+        option2 = {
+            title: {
+                text: '月派件工作量'
+            },
+            legend: {
+                data: areas2,
+                align: 'left'
+            },
+            grid: {
+                show: true
+            },
+            toolbox: {
+                feature: {
+                    magicType: {
+                        type: ['stack', 'tiled']
+                    },
+                    dataView: {},
+                    saveAsImage: {
+                        pixelRatio: 2
+                    }
+                }
+            },
+            tooltip: {},
+            xAxis: {
+                data: xAxisData2,
+                silent: false,
+                splitLine: {
+                    show: true
+                }
+            },
+            yAxis: {
+                minInterval: true
+            },
+            series: series2,
+            animationEasing: 'elasticOut',
+            animationDelayUpdate: function (idx) {
+                return idx * 10;
+            }
+        };
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>快递员登录</title>
+    <!-- Bootstrap -->
+    <link href="/css/bootstrap.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="/css/font-awesome.css" rel="stylesheet">
+    <!-- NProgress -->
+    <link href="/css/nprogress.css" rel="stylesheet">
+    <!-- Animate.css -->
+    <link href="/css/animate.css" rel="stylesheet">
+
+    <!-- Custom Theme Style -->
+    <link href="/css/custom.css" rel="stylesheet">
+</head>
+<body class="login">
+<div id="app" class="middle">
+    <div>
+        <a class="hiddenanchor" id="signup"></a>
+        <a class="hiddenanchor" id="signin"></a>
+
+        <div class="login_wrapper">
+            <div class="animate form login_form">
+                <section class="login_content">
+                    <form onsubmit="return false;">
+                        <h1>快递员登录</h1>
+                        <div>
+                            <input type="text" class="form-control" v-model="name" placeholder="用户名" required="">
+                        </div>
+                        <div>
+                            <input class="form-control" type="password" v-model="password" placeholder="密码"
+                                   required="">
+                        </div>
+                        <div>
+                            <button @click="login" class="btn btn-default submit"
+                                    v-bind:class="requestStateClass">{{msg}}
+                            </button>
+                            <a class="reset_pass" href="#">忘记密码？</a>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="separator">
+                            <p class="change_link">还没账号？去
+                                <a href="#signup" class="to_register"> 注册 </a>
+                            </p>
+                            <div class="clearfix"></div>
+                            <br/>
+                            <div>
+                                <h1> 快递员端</h1>
+                                <p>©2020 All Rights Reserved. </p>
+                            </div>
+                        </div>
+                    </form>
+                </section>
+            </div>
+            <div id="register" class="animate form registration_form">
+                <section class="login_content">
+                    <form onsubmit="return false;">
+                        <h1>快递员注册</h1>
+                        <div>
+                            <input type="text" class="form-control" v-model="regName" placeholder="用户名" required=""/>
+                        </div   >
+                        <div>
+                            <input type="password" class="form-control" v-model="regPassword" placeholder="密码"
+                                   required=""/>
+                        </div>
+                        <div>
+                            <input class="form-control" v-model="phone" placeholder="电话号码" required="">
+                        </div>
+                        <div>
+                            <label>地区</label>
+                            <select v-model="area" class="form-control" required="">
+                                <option>地区A</option>
+                                <option>地区B</option>
+                            </select>
+                        </div>
+                        <div>
+                            <button @click="register" class="btn btn-default submit"
+                                    v-bind:class="regRequestStateClass">
+                                {{regMsg}}
+                            </button>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="separator">
+                            <p class="change_link">已有账号？去
+                                <a href="#signin" class="to_register"> 登录 </a>
+                            </p>
+                            <div class="clearfix"></div>
+                            <br/>
+                            <div>
+                                <h1> 快递员端</h1>
+                                <p>©2020 All Rights Reserved. </p>
+                            </div>
+                        </div>
+                    </form>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="/js/jquery.js"></script>
+<script type="text/javascript" src="/js/vue.js"></script>
+</body>
+<script>
+    let vue = new Vue({
+        el: '#app',
+        data: {
+            name: '',
+            password: '',
+            msg: '登录',
+            state: 'normal',
+            regName: '',
+            regPassword: '',
+            regMsg: '注册',
+            regState: 'normal',
+            phone: '',
+            area: ''
+        },
+        methods: {
+            login: function () {
+                $.post("/deliverer/login", {
+                    "name": this.name,
+                    "password": this.password
+                }, function (response) {
+                    let json = JSON.parse(response);
+                    if (json.result === "fail") {
+                        vue.state = json.result;
+                        vue.msg = json.msg;
+                    } else {
+                        vue.state = json.result;
+                        vue.msg = '登录成功,正在跳转';
+                        $(location).attr("href", "/deliverer/main");
+                    }
+                });
+            },
+            register: function () {
+                let data = {
+                    "name": this.regName,
+                    "password": this.regPassword,
+                    "phone": this.phone,
+                    "area": this.area
+                };
+                $.ajax("/deliverer/register", {
+                    type: "post",
+                    data: data,
+                    success: function (response) {
+                        let json = JSON.parse(response);
+                        if (json.result === "fail") {
+                            vue.regState = json.result;
+                            vue.regMsg = json.msg;
+                        } else {
+                            vue.regState = json.result;
+                            vue.regMsg = '注册成功';
+                            vue.regName = "";
+                            vue.regPassword = '';
+                            vue.phone = '';
+                            vue.area = '';
+                            // $(location).attr("href", "/member/main");
+                        }
+                    }
+                });
+            }
+        },
+        computed: {
+            requestStateClass: function () {
+                return {
+                    'btn-primary': this.state === 'normal',
+                    'btn-danger': this.state === 'fail',
+                    'btn-success': this.state === 'success'
+                }
+            },
+            regRequestStateClass: function () {
+                return {
+                    'btn btn-default submit': this.regState === 'normal',
+                    'btn btn-danger submit': this.regState === 'fail',
+                    'btn btn-success submit': this.regState === 'success'
+                }
+            }
+        }
+    });
+</script>
+</html>

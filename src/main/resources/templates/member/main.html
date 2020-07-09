@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>客户端</title>
+    <!-- Bootstrap -->
+    <link th:href="@{/css/bootstrap.css}" rel="stylesheet">
+    <link th:href="@{/css/customer.css}" rel="stylesheet">
+
+    <style type="text/css">
+        html {
+            height: 100%;
+        }
+
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+    </style>
+</head>
+<body>
+<div id="app">
+    <div th:replace="@{/member/nav}::nav"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 col-sm-12 col-xs-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3>寄件人信息
+                            <small>请填入寄件人信息</small>
+                        </h3>
+                    </div>
+                    <div class="panel-body">
+                        <div data-parsley-validate class="form-horizontal form-label-left">
+                            <div class="form-group">
+                                <label class="control-label col-md-3 col-sm-3 col-xs-12" for="senderName">姓名 <span
+                                        class="required">*</span>
+                                </label>
+                                <div class="col-md-6 col-sm-6 col-xs-12">
+                                    <input v-model="senderName" type="text" id="senderName" required="required"
+                                           class="form-control col-md-7 col-xs-12">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-md-3 col-sm-3 col-xs-12" for="senderPhone">手机/固话
+                                    <span class="required">*</span>
+                                </label>
+                                <div class="col-md-6 col-sm-6 col-xs-12">
+                                    <input v-model="senderPhone" type="tel" id="senderPhone" required="required"
+                                           class="form-control col-md-7 col-xs-12">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-sm-3 col-xs-12" for="senderArea">寄件地址
+                                    <span class="required">*</span>
+                                </label>
+                                <div class="col-sm-6 col-xs-12">
+                                    <select id="senderArea" class="form-control" v-model="senderArea">
+                                        <option>地区A</option>
+                                        <option>地区B</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-sm-offset-3 col-sm-6 col-xs-12">
+                                    <input id="senderAddress" type="text" required="required"
+                                           class="form-control col-md-7 col-xs-12">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-sm-12 col-xs-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3>收件人信息
+                            <small>请填入收件人信息</small>
+                        </h3>
+                    </div>
+                    <div class="panel-body">
+                        <div data-parsley-validate class="form-horizontal form-label-left">
+                            <div class="form-group">
+                                <label class="control-label col-md-3 col-sm-3 col-xs-12" for="receiverName">姓名 <span
+                                        class="required">*</span>
+                                </label>
+                                <div class="col-md-6 col-sm-6 col-xs-12">
+                                    <input v-model="receiverName" type="text" id="receiverName" required="required"
+                                           class="form-control col-md-7 col-xs-12">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-md-3 col-sm-3 col-xs-12" for="receiverPhone">手机/固话
+                                    <span class="required">*</span>
+                                </label>
+                                <div class="col-md-6 col-sm-6 col-xs-12">
+                                    <input v-model="receiverPhone" type="tel" id="receiverPhone" required="required"
+                                           class="form-control col-md-7 col-xs-12">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-md-3 col-sm-3 col-xs-12" for="receiveArea">收件地址
+                                    <span class="required">*</span>
+                                </label>
+                                <div class="col-sm-6 col-xs-12">
+                                    <select id="receiveArea" class="form-control" v-model="receiveArea">
+                                        <option>地区A</option>
+                                        <option>地区B</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-sm-offset-3 col-md-6 col-sm-6 col-xs-12">
+                                    <input id="receiverAddress" type="text" required="required"
+                                           class="form-control col-md-7 col-xs-12">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-sm-12 col-xs-12 col-md-offset-3">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3>物品信息
+                        <small>请填入物品信息</small>
+                    </h3>
+                </div>
+                <div class="panel-body">
+                    <div data-parsley-validate class="form-horizontal form-label-left">
+                        <div class="form-group">
+                            <label class="control-label col-md-3 col-sm-3 col-xs-12" for="type">类型 <span
+                                    class="required">*</span>
+                            </label>
+                            <div class="col-md-6 col-sm-6 col-xs-12">
+                                <select id="type" class="form-control" v-model="type">
+                                    <option value=""></option>
+                                    <option th:each="type : ${typeList}" th:text="${type.name}"
+                                            th:value="${type.name}"></option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-md-3 col-sm-3 col-xs-12" for="weight">重量 <span
+                                    class="required">*</span>
+                            </label>
+                            <div class="col-md-6 col-sm-6 col-xs-12">
+                                <select id="weight" class="form-control" v-model="weight">
+                                    <option value=""></option>
+                                    <option value="1公斤以下">1公斤以下</option>
+                                    <option value="1-5公斤">1-5公斤</option>
+                                    <option value="5公斤以上">5公斤以上</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-9 col-sm-9 col-xs-12 col-sm-offset-3">
+                                <button type="button" class="btn btn-primary" @click="pushOrder">寄件</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<!-- jQuery -->
+<script th:src="@{/js/jquery.js}"></script>
+<!-- Bootstrap -->
+<script th:src="@{/js/bootstrap.js}"></script>
+<!-- Vue.js-->
+<script th:src="@{/js/vue.js}"></script>
+
+<script type="text/javascript"
+        src="https://webapi.amap.com/maps?v=1.4.15&key=b1cae545cf3ce5d8816bb2cb66f4f0c3"></script>
+<script type="text/javascript"
+        src="https://webapi.amap.com/maps?v=1.4.15&key=b1cae545cf3ce5d8816bb2cb66f4f0c3&plugin=AMap.Autocomplete"></script>
+<script type="text/javascript">
+    let vue = new Vue({
+        el: "#app",
+        data: {
+            senderArea: "",
+            receiveArea: "",
+            senderName: "",
+            senderPhone: "",
+            receiverName: "",
+            receiverPhone: "",
+            type: "",
+            weight: ""
+        },
+        methods: {
+            pushOrder: function () {
+                let data = {
+                    "receiveArea": this.senderArea,
+                    "dispatchArea": this.receiveArea,
+                    "senderName": this.senderName,
+                    "senderPhone": this.senderPhone,
+                    "senderAddress": $("#senderAddress").val(),
+                    "receiverName": this.receiverName,
+                    "receiverPhone": this.receiverPhone,
+                    "receiverAddress": $("#receiverAddress").val(),
+                    "type": this.type,
+                    "weight": this.weight
+                };
+                $.ajax({
+                    type: "post",
+                    url: "/member/pushOrder",
+                    data: JSON.stringify(data),
+                    contentType: "application/json; charset=utf-8",//(可以)
+                    //contentType: "text/xml",//(可以)
+                    //contentType:"application/x-www-form-urlencoded",//(可以)
+                    //dataType: "string",
+                    success: function (response) {
+                        let json = JSON.parse(response);
+                        if (json.result === "success") {
+                            vue.senderArea = '';
+                            vue.receiveArea = '';
+                            vue.senderName = '';
+                            vue.senderPhone = '';
+                            vue.receiverName = '';
+                            vue.receiverPhone = '';
+                            vue.type = '';
+                            vue.weight = '';
+                            $("#senderAddress").val('');
+                            $("#receiverAddress").val('');
+                            alert("提交成功");
+                        } else {
+                            alert("提交失败");
+                        }
+                    }
+                });
+            }
+        }
+    });
+
+    //输入提示
+    let auto = new AMap.Autocomplete({
+        input: "senderAddress"
+    });
+    let auto2 = new AMap.Autocomplete({
+        input: "receiverAddress"
+    });
+</script>
+</html>
