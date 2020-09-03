@@ -141,28 +141,26 @@ public class DelivererService {
     }
 
     /**
-     * 快递员接单业务，使用synchronized关键字同步DelivererService类实现非公平锁
+     * 快递员接单业务，使用synchronized关键字锁住DelivererService对象
      *
      * @param orderId     订单id
      * @param httpSession 快递员会话
      * @return JSON数据
      */
-    public String handleOrder(long orderId, HttpSession httpSession) {
-        synchronized (DelivererService.class) {
-            Integer delivererId = (Integer) httpSession.getAttribute("delivererId");
-            Optional<Order> orderOptional = orderRepository.findById(orderId);
-            //接单操作
-            if (orderOptional.isPresent()) {
-                Order order = orderOptional.get();
-                order.setReceiveDelivererId(delivererId);
-                order.setState("已接单");
-                orderRepository.save(order);
-            }
-            return "{" +
-                    "\"result\":\"success\"," +
-                    "\"msg\":\"接单成功\"" +
-                    "}";
+    public synchronized String handleOrder(long orderId, HttpSession httpSession) {
+        Integer delivererId = (Integer) httpSession.getAttribute("delivererId");
+        Optional<Order> orderOptional = orderRepository.findById(orderId);
+        //接单操作
+        if (orderOptional.isPresent()) {
+            Order order = orderOptional.get();
+            order.setReceiveDelivererId(delivererId);
+            order.setState("已接单");
+            orderRepository.save(order);
         }
+        return "{" +
+                "\"result\":\"success\"," +
+                "\"msg\":\"接单成功\"" +
+                "}";
     }
 
     /**
@@ -329,7 +327,7 @@ public class DelivererService {
             receiveList.add(orderRepository
                     .findByReceiveDelivererIdAndStateOrStateAndEnterDateBetween(delivererId,
                             "已递送至物流中心", "已签收", year + "-" + month + "-01 00:00:00",
-                            year + "-" + month + "-31 23:59:59","派件失败").size());
+                            year + "-" + month + "-31 23:59:59", "派件失败").size());
         }
         for (Integer month = 1; month <= endMonth; month++) {
             delivererList.add(orderRepository
